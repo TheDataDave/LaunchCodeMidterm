@@ -5,7 +5,7 @@
 @returns: the metricFields i.e (abbrev.) App usage, screen on time, number of apps install, age as 
 an object with each containing {average, median} formatted.
 */
-export default function useDataMetrics(data, countryCode) {
+export default function useDataMetrics(data, locale) {
     const metricFields = [
         "App Usage Time (min/day)",
         "Screen On Time (hours/day)",
@@ -13,10 +13,19 @@ export default function useDataMetrics(data, countryCode) {
         "Age"
     ]
 
+    // Format number to specified locale and 2 digits
     function formatNumber(num) {
-        return new Intl.NumberFormat(countryCode).format(num);
+        return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(num);
     }
 
+    /* 
+    @param field: provided one of the metricFields values above
+
+    @return: {average, median} formatted Intl average and median values
+    
+    uses the parent functions arguments to format the data for the average and median values
+    given the specified field from metricFields
+    */
     function calculateMetrics(field) {
         if (!data || data.length === 0) {
             return { average: 0, median: 0 }; // Handle empty data
@@ -34,12 +43,14 @@ export default function useDataMetrics(data, countryCode) {
             median = values[mid];
         }
 
+        // Ensure we always reuturn a number, 0 as fallback
         const formattedAvg = formatNumber(average) || 0;
         const formattedMed = formatNumber(median) || 0;
 
         return { average: formattedAvg, median: formattedMed };
     }
 
+    // Created all of our metric data here
     const appUsage = calculateMetrics(metricFields[0]);
     const screenOnTime = calculateMetrics(metricFields[1]);
     const numberOfApps = calculateMetrics(metricFields[2]);

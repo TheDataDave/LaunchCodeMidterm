@@ -28,6 +28,7 @@ export function SearchProvider({ children }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState(null);
 
+
 	/*
 	@param params: Object {query, queryValue} for data filtering
 
