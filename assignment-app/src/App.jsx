@@ -1,8 +1,21 @@
+/*
+Known issues: When initially loading the search page I get a loading message, but 
+subsequent page loads have a slight delay.
+I've tried (and didn't work): memo, suspense, link: intent, render
+*/
+import { lazy, Suspense } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
-import Search from "./pages/Search";
 import PageNotFound404 from "./pages/PageNotFound404";
-import { SearchProvider } from "./context/SearchContext";
+import Loading from "./components/Loading";
+
+// Don't want to load all of the data when loading the app
+const SearchProvider = lazy(() =>
+	import("./context/SearchContext").then((module) => ({
+		default: module.SearchProvider,
+	}))
+);
+const Search = lazy(() => import("./pages/Search"));
 
 function App() {
 	return (
@@ -19,13 +32,17 @@ function App() {
 				</Link>
 			</nav>
 			<hr />
-			<SearchProvider> {/* Wrap context around the routes so we don't lose the state */}
-				<Routes>
-					<Route path="/" element={<Home />} />
-					<Route path="/search" element={<Search />} />
-					<Route path="*" element={<PageNotFound404 />} />
-				</Routes>
-			</SearchProvider>
+			<Suspense fallback={<Loading label="Page loading please wait."/>}>
+				<SearchProvider>
+					{" "}
+					{/* Wrap context around the routes so we don't lose the state */}
+						<Routes>
+							<Route path="/" element={<Home />} />
+							<Route path="/search" element={<Search />} />
+							<Route path="*" element={<PageNotFound404 />} />
+						</Routes>
+				</SearchProvider>
+			</Suspense>
 		</div>
 	);
 }
